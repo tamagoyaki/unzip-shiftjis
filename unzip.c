@@ -701,6 +701,12 @@ See \"unzip -hh\" or unzip.txt for more help.  Examples:\n\
   unzip data1 -x joe   => extract all files except joe from zipfile data1.zip\n\
 %s\
   unzip -fo foo %-6s => quietly replace existing %s if archive file newer\n";
+#ifdef FORCED_SHIFT_JIS
+static ZCONST char Far UnzipUsageLine6[] = "\n\
+UNZIP-SHIFTJIS ORIGINAL IMPLEMENTATION\n\
+  -S  convert filename from Shift-JIS to UTF-8\n\
+\n";
+#endif /* FORCED_SHIFT_JIS */
 #endif /* ?SFX */
 
 
@@ -1523,6 +1529,14 @@ int uz_opts(__G__ pargc, pargv)
                     else
                         uO.jflag = TRUE;
                     break;
+#ifdef FORCED_SHIFT_JIS
+	    case ('S'):
+		if (negative)
+		    uO.fsjis = FALSE, negative = 0;
+		else
+		    uO.fsjis = TRUE;
+		break;
+#endif /* FORCED_SHIFT_JIS */
 #if (defined(ATH_BEO) || defined(MACOS))
                 case ('J'):    /* Junk AtheOS, BeOS or MacOS file attributes */
                     if( negative ) {
@@ -2066,6 +2080,9 @@ You must quote non-lowercase options and filespecs, unless SET PROC/PARSE=EXT.\
           LoadFarStringSmall(Example2), LoadFarStringSmall2(Example3),
           LoadFarStringSmall2(Example3)));
 
+#ifdef FORCED_SHIFT_JIS
+	Info(slide, flag, ((char *)slide, LoadFarString(UnzipUsageLine6)));
+#endif
     } /* end if (uO.zipinfo_mode) */
 
     if (error)

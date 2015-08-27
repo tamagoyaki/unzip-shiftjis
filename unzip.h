@@ -78,6 +78,11 @@ freely, subject to the above disclaimer and the following restrictions:
 #ifndef __unzip_h   /* prevent multiple inclusions */
 #define __unzip_h
 
+/*
+  @see http://www.melange.co.jp/blog/?p=2902
+*/
+#define FORCED_SHIFT_JIS
+
 /*---------------------------------------------------------------------------
     Predefined, machine-specific macros.
   ---------------------------------------------------------------------------*/
@@ -495,6 +500,9 @@ typedef struct _UzpOpts {
     int scanimage;      /* -I: scan image files */
 #endif
     int jflag;          /* -j: junk pathnames (unzip) */
+#ifdef FORCED_SHIFT_JIS
+    int fsjis; /* -S: forced Shift-JIS */
+#endif
 #if (defined(__ATHEOS__) || defined(__BEOS__) || defined(MACOS))
     int J_flag;         /* -J: ignore AtheOS/BeOS/MacOS e. f. info (unzip) */
 #endif

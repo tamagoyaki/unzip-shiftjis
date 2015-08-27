@@ -139,6 +139,39 @@ static int is_vms_varlen_txt OF((__GPRO__ uch *ef_buf, unsigned ef_len));
 #endif
 static int disk_error OF((__GPRO));
 
+#ifdef FORCED_SHIFT_JIS
+#include <iconv.h>
+#define S_SIZE 1024
+static void
+sj2u8(char in[], unsigned int *len)
+{
+    iconv_t icd = iconv_open("UTF-8", "Shift_JIS");
+
+    if ((iconv_t)-1 != icd) {
+	char *ibuff = in;
+	size_t ileft = strlen(in);
+	char *on = malloc(S_SIZE);
+
+	if (on) {
+	    char  *obuff = on;
+	    size_t oleft = S_SIZE - 1;
+
+	    while (0 < ileft) {
+		if ((size_t)-1  == iconv(icd, &ibuff, &ileft, &obuff, &oleft)) {
+		    break;
+		}
+	    }
+
+	    *obuff = '\0';
+	    strcpy(in, on);
+	    *len = obuff - on;
+	    free(on);
+	}
+
+	iconv_close(icd);
+    }
+}
+#endif
 
 /****************************/
 /* Strings used in fileio.c */
@@ -2238,10 +2271,21 @@ int do_string(__G__ length, option)   /* return PK-type error code */
         G.filename[length] = '\0';      /* terminate w/zero:  ASCIIZ */
 #endif /* ?UNICODE_SUPPORT */
 
+
+#ifdef FORCED_SHIFT_JIS
+	if (uO.fsjis) {
+	    sj2u8(G.filename, &length);
+	    //printf("G.filename: %s, length %d\n", G.filename, length);
+	} else {
+	    Ext_ASCII_TO_Native(G.filename, G.pInfo->hostnum, G.pInfo->hostver,
+				G.pInfo->HasUxAtt, (option == DS_FN_L));
+	}
+#else
         /* translate the Zip entry filename coded in host-dependent "extended
            ASCII" into the compiler's (system's) internal text code page */
         Ext_ASCII_TO_Native(G.filename, G.pInfo->hostnum, G.pInfo->hostver,
                             G.pInfo->HasUxAtt, (option == DS_FN_L));
+#endif
 
         if (G.pInfo->lcflag)      /* replace with lowercase filename */
             STRLOWER(G.filename, G.filename);

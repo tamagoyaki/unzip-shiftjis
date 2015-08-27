@@ -2554,6 +2554,12 @@ char *fnfilter(raw, space, size)   /* convert name to safely printable form */
     uch *space;
     extent size;
 {
+#ifdef FORCED_SHIFT_JIS
+    if (uO.fsjis) {
+	return raw;
+    }
+#endif
+
 #ifndef NATIVE   /* ASCII:  filter ANSI escape codes, etc. */
     ZCONST uch *r=(ZCONST uch *)raw;
     uch *s=space;
